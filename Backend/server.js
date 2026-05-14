@@ -14,6 +14,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected ✅'))
   .catch((err) => console.log('MongoDB error:', err))
 
+  app.use('/webhook', webhookRoute);
+
 app.get('/', (req, res) => {
   res.send('Rozgar Mitra backend chal raha hai!')
 })
