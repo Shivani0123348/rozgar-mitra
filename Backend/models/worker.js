@@ -8,9 +8,9 @@ const workerSchema = new mongoose.Schema({
   location: String,
   salary: String,
   conversation: [{
-    role: String,
-    content: String 
-  }],
+  role: String,
+  message: String
+}],
   profileComplete: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 })

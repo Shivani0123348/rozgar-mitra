@@ -19,27 +19,66 @@ router.post('/', async (req, res) => {
       worker = await Worker.create({ phone: userPhone, conversation: [] })
     }
 
-    worker.conversation.push({ role: 'USER', message: userMsg })
+    const chatHistory = worker.conversation
+      .filter(msg => msg.message && msg.message.trim() !== '')
+      .map(msg => ({
+        role: msg.role,
+        message: msg.message
+      }))
 
     const response = await cohere.chat({
       model: 'command-r-plus-08-2024',
-      preamble: 'Tu Rozgar Mitra hai — UP ke mazdooron ka dost. Hindi mein baat kar, simple bhasha use kar. Worker se ek ek karke yeh poochh: 1. Naam 2. Kya kaam karta hai (skill) 3. Kitne saal ka experience 4. Kahan ka hai (city/district) 5. Kitni salary chahiye. Jab sab mil jaaye toh likho: Tera profile ready ho gaya PROFILE_COMPLETE. Friendly raho, encourage karo.',
-      chatHistory:[],
+      preamble: `Tu Rozgar Mitra hai — UP ke mazdooron ka dost. Hindi mein baat kar, simple bhasha use kar.
+      Worker se ek ek karke yeh poochh:
+      1. Naam
+      2. Kya kaam karta hai (skill)
+      3. Kitne saal ka experience
+      4. Kahan ka hai (city/district)
+      5. Kitni salary chahiye
+      
+      Jab sab mil jaaye toh exactly yeh format mein likho aur kuch mat likho baad mein:
+      "Tera profile ready ho gaya [naam]! PROFILE_COMPLETE
+      JSON:{"name":"[naam]","skill":"[skill]","experience":"[experience]","location":"[location]","salary":"[salary]"}"
+      
+      Friendly raho, encourage karo.`,
+      chatHistory: chatHistory,
       message: userMsg
     })
 
     const reply = response.text
 
+    worker.conversation.push({ role: 'USER', message: userMsg })
     worker.conversation.push({ role: 'CHATBOT', message: reply })
 
     if (reply.includes('PROFILE_COMPLETE')) {
       worker.profileComplete = true
+
+      // JSON extract karo
+      try {
+        const jsonMatch = reply.match(/JSON:\s*({.*?})/s)
+        if (jsonMatch) {
+          const data = JSON.parse(jsonMatch[1])
+          worker.name = data.name || ''
+          worker.skill = data.skill || ''
+          worker.experience = data.experience || ''
+          worker.location = data.location || ''
+          worker.salary = data.salary || ''
+        }
+      } catch (e) {
+        console.log('JSON parse error:', e)
+      }
     }
 
     await worker.save()
 
+    // User ko sirf clean message bhejo
+    const cleanReply = reply
+      .replace('PROFILE_COMPLETE', '')
+      .replace(/JSON:\s*{.*?}/s, '')
+      .trim()
+
     const twiml = new twilio.twiml.MessagingResponse()
-    twiml.message(reply.replace('PROFILE_COMPLETE', ''))
+    twiml.message(cleanReply)
     res.type('text/xml').send(twiml.toString())
 
   } catch (err) {
@@ -48,4 +87,4 @@ router.post('/', async (req, res) => {
   }
 })
 
-export default router;
+export default router
