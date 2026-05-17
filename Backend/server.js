@@ -1,8 +1,9 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import webhookRoute from './routes/webhook.js';
 import cors from 'cors'
-
+import Worker from './models/Worker.js';
 dotenv.config();
 
 const app = express()
@@ -16,10 +17,15 @@ mongoose.connect(process.env.MONGODB_URI)
 
   app.use('/webhook', webhookRoute);
 
-app.get('/', (req, res) => {
-  res.send('Rozgar Mitra backend chal raha hai!')
+app.get('/workers', async (req, res) => {
+  try {
+    const workers = await Worker.find({ profileComplete: true })
+    res.json(workers)
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching workers' })
+  }
 })
 
-app.listen(3000, () => {
-  console.log('Server chal raha hai port 3000 pe 🚀')
-})
+app.listen(5000, () => {
+  console.log('Server chal raha hai port 5000 pe 🚀')
+});
