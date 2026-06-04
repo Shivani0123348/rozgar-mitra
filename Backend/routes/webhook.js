@@ -2,7 +2,7 @@ import express from 'express'
 import twilio from 'twilio'
 import { CohereClient } from 'cohere-ai'
 import dotenv from 'dotenv'
-import Worker from '../models/Worker.js'
+import Worker from '../models/worker.js'
 
 dotenv.config()
 
