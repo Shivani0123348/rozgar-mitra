@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import webhookRoute from './routes/webhook.js';
 import cors from 'cors'
-import Worker from './models/Worker.js';
+import Worker from './models/worker.js';
 import authRoute from './routes/auth.js';
 import authMiddleware from './middleware/auth.js';
 dotenv.config();
@@ -31,7 +31,7 @@ app.get('/workers', authMiddleware, async (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log('Server chal raha hai port 5000 pe 🚀');
+  console.log('Server chal raha hai port 5000 pe 🚀');   
 });
 
 
