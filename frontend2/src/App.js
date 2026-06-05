@@ -19,7 +19,7 @@ function App() {
   useEffect(() => {
     if (employer) {
       const token = localStorage.getItem("token");
-      fetch("http://localhost:5000/workers", {
+      fetch("https://rozgar-mitra.onrender.com/workers", {
         headers: { Authorization: `Bearer ${token}` },
       })      
         .then((res) => res.json())
