@@ -9,6 +9,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post('/', async (req, res) => {
+   console.log("🔥 WEBHOOK HIT");
+  console.log("BODY:", req.body);
   const cohere = new CohereClient({ token: process.env.COHERE_API_KEY })
   const userMsg = req.body.Body
   const userPhone = req.body.From
